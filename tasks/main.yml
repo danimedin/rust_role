@@ -1,0 +1,74 @@
+---
+# tasks file for rust
+  - name: instala cargo
+    community.general.apk:
+      name: '{{ item }}'
+      no_cache: true
+      state: present
+    with_items:
+      - rust
+      - cargo
+    when: ansible_distribution == "Alpine"
+  - name: instala rust para Debian 11
+    block:
+      - name: Instala curl
+        ansible.builtin.apt:
+          name: curl
+          state: present
+          update_cache: yes
+      - name: copia-vars-ruts
+        ansible.builtin.copy:
+          src: files/10rust-profile.sh
+          dest: /etc/profile.d/
+      - name: descaga rustup-init
+        ansible.builtin.get_url:
+          url: "{{ url }}"
+          dest: /root
+          mode: '0700'
+      - name: Get sha256 sum of script
+        ansible.builtin.stat:
+          path: /root/rustup-init
+          checksum_algorithm: sha256
+          get_checksum: yes
+        register: shell_stat
+
+      - name: Verify sha256sum of script before execution.
+        fail:
+          msg: "Erro, non é o mesmo checksum"
+        when: 'shell_stat.stat.checksum !=  rustupSha256'
+
+      - name: Executa o rustup-init
+        ansible.builtin.shell:
+          cmd: ./rustup-init -y --no-modify-path --profile minimal --default-toolchain "{{ rust_version }}" --default-host "{{ rustArch }}"
+          chdir: /root        
+      - name: Elimina rustup-init
+        ansible.builtin.file:
+          path: /root/rustup-init
+          state: absent
+      - name: Concede permisos
+        ansible.builtin.file:
+          dest: "{{ item }}"
+          mode: 'a+w'
+          recurse: true 
+        with_items:
+          - "{{ rust_home }}"
+          - "{{ cargo_home }}" 
+    when: ansible_distribution_release == "bullseye"
+  # - name: instala rust
+  #   community.general.apk:
+  #     name: rust
+  #     no_cache: true
+  #     state: present
+  # - name: copia o rust-profile coas variables de contorno
+  #   ansible.builtin.copy:
+  #     src: files/10rust-profile.sh
+  #     dest: /etc/profile.d/ 
+  # - name: copia o script que instala rust
+  #   ansible.builtin.copy:
+  #     src: files/instala-rust.sh
+  #     dest: /root/
+  #     mode: '0700'
+  # - name: executa o script que instala rust
+  #   ansible.builtin.shell: 
+  #     cmd:  /root/instala-rust.sh
+

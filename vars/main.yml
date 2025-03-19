@@ -1,0 +1,10 @@
+---
+# vars file for rust
+rustArch : "x86_64-unknown-linux-gnu"
+url : 'https://static.rust-lang.org/rustup/archive/1.27.1/{{ rustArch }}/rustup-init'
+rustupSha256 : '6aeece6993e902708983b209d04c0d1dbb14ebb405ddb87def578d41f920f56d'
+#rust_version : 1.70
+rust_version : 1.84
+rust_home : /usr/local/rustup
+cargo_home : /usr/local/cargo 
+
