@@ -16,12 +16,13 @@ Dependencies
 
 Example Playbook
 ----------------
+```
 - hosts: builder-axum
   vars:
     ruta_rust: '~/ansible/roles/rust_role'
   roles: 
     - "{{ ruta_rust }}"
-
+```
 License
 -------
 
